@@ -20,6 +20,17 @@ let bird = {
     height : birdHeight
 }
 
+//pipes
+//bruker en array til å lagre disse, fordi det er flere
+let pipeArray = [];
+let pipeWidth = 64;
+let pipeHeight = 512;
+let pipeX = boardWidth;
+let pipeY = 0;
+
+let topPipeImg;
+let bottomPipeImg;
+
 //når skjermen lastes inn, lastes inn canvasen
 window.onload = function() {
     board = document.getElementById("board")
@@ -36,7 +47,17 @@ window.onload = function() {
     context.drawImage(birdImg, bird.x, bird.y, bird.width, bird.height);
     }
 
+    //legger inn pipes som bilder
+    topPipeImg = new Image();
+    topPipeImg.src = "bilder/toppipe.png";
+
+    bottomPipeImg = new Image();
+    bottomPipeImg.src = "bilder/bottompipe.png"
+
     requestAnimationFrame(update);
+
+    //skape en function som legger inn pipes
+    setInterval(placePipes, 1500); //hver 1.5s
 }
 
 //oppdaterer canvasen (tegner den på nytt og på nytt)
@@ -47,5 +68,25 @@ function update () {
 
     //fuglen tegnes på nytt hver gang
     context.drawImage(birdImg, bird.x, bird.y, bird.width, bird.height);
+
+    //pipes legges inn
+    for (let i = 0; i < pipeArray.length; i++) {
+        let pipe = pipeArray[i];
+        context.drawImage(pipe.img, pipe.x, pipe.y, pipe.width, pipe.height);
+    }
 }
 
+function placePipes() {
+
+    let topPipe = {
+        img : topPipeImg,
+        x : pipeX,
+        y : pipeY,
+        width : pipeWidth,
+        height : pipeHeight,
+        passed : false //om fuglen har gått forbi
+    }
+
+    pipeArray.push(topPipe); 
+    //hver 1,5s kaller man functionen pipe
+}
