@@ -31,6 +31,10 @@ let pipeY = 0;
 let topPipeImg;
 let bottomPipeImg;
 
+//physics
+let veloxityX = -2; //pipes flytter seg til høyre
+let veloxityY = 0; //fuglen hoppe hastighet (legger til at når du trykker på space blir velocityY til et negativt tall)
+
 //når skjermen lastes inn, lastes inn canvasen
 window.onload = function() {
     board = document.getElementById("board")
@@ -55,9 +59,9 @@ window.onload = function() {
     bottomPipeImg.src = "bilder/bottompipe.png"
 
     requestAnimationFrame(update);
-
     //skape en function som legger inn pipes
     setInterval(placePipes, 1500); //hver 1.5s
+    document.addEventListener("keydown", moveBird); //hver gang du trykker på en key, kaller den movebird functionen
 }
 
 //oppdaterer canvasen (tegner den på nytt og på nytt)
@@ -67,21 +71,30 @@ function update () {
     context.clearRect(0, 0, board.width, board.height);
 
     //fuglen tegnes på nytt hver gang
+    bird.y += veloxityY;
     context.drawImage(birdImg, bird.x, bird.y, bird.width, bird.height);
 
     //pipes legges inn
     for (let i = 0; i < pipeArray.length; i++) {
         let pipe = pipeArray[i];
+        pipe.x += veloxityX //skifter x posisjonen til pipe-en 2px til høyre hver gang
         context.drawImage(pipe.img, pipe.x, pipe.y, pipe.width, pipe.height);
     }
 }
 
 function placePipes() {
 
+    //slik at pipes kommer på forskjellige høyder
+    //0-1 * pipeHeight/2
+    //hvis random returnerer 0 -> blir y posisjonen -128 (pipeheight/4)
+    //hvis random returnerer 1 -> blir y posisjonen -128-256 (pipeheight/4 - pipeheight/2) = -3/4 pipeheight
+    let randomPipeY = pipeY - pipeHeight/4 - Math.random()*(pipeHeight/2); //flytter pipe-en oppover
+    let openingSpace = board.height/4 //rom for fuglen til å fly gjennom
+
     let topPipe = {
         img : topPipeImg,
         x : pipeX,
-        y : pipeY,
+        y : randomPipeY,
         width : pipeWidth,
         height : pipeHeight,
         passed : false //om fuglen har gått forbi
@@ -89,4 +102,22 @@ function placePipes() {
 
     pipeArray.push(topPipe); 
     //hver 1,5s kaller man functionen pipe
+
+    //lager mellomrom mellom pipes
+    let bottomPipe = {
+        img : bottomPipeImg,
+        x : pipeX,
+        y: randomPipeY + pipeHeight + openingSpace,
+        width : pipeWidth,
+        height : pipeHeight,
+        passed : false
+    }
+    pipeArray.push(bottomPipe);
+}
+
+function moveBird(e) {
+    if (e.code == "space" || e.code == "ArrowUp" || e.code == "KeyX") {
+        //hopp
+        velocityY = -6;
+    }
 }
