@@ -32,8 +32,12 @@ let topPipeImg;
 let bottomPipeImg;
 
 //physics
-let veloxityX = -2; //pipes flytter seg til høyre
-let veloxityY = 0; //fuglen hoppe hastighet (legger til at når du trykker på space blir velocityY til et negativt tall)
+let velocityX = -2; //pipes flytter seg til høyre
+let velocityY = 0; //fuglen hoppe hastighet (legger til at når du trykker på space blir velocityY til et negativt tall)
+let gravity = 0.4; //drar fuglen nedover
+
+let gameOver = false //når fuglen treffer er spillet over
+let score = 0; //legger inn stilling, starter på 0
 
 //når skjermen lastes inn, lastes inn canvasen
 window.onload = function() {
@@ -67,23 +71,56 @@ window.onload = function() {
 //oppdaterer canvasen (tegner den på nytt og på nytt)
 function update () {
     requestAnimationFrame(update);
+    if (gameOver) {
+        return;
+    }
     //hver gang vi oppdaterer rammen vil vi "clear" den forrige
     context.clearRect(0, 0, board.width, board.height);
 
     //fuglen tegnes på nytt hver gang
-    bird.y += veloxityY;
+    velocityY += gravity; //Legger til at den dras ned når den går oppover (den hopper)
+    bird.y = Math.max (bird.y + velocityY, 0); //slik at bird.y ikke kommer over toppen av canvasen
     context.drawImage(birdImg, bird.x, bird.y, bird.width, bird.height);
+
+    if (bird.y > board.height) {
+        gameOver = true;
+    } //Hvis fuglen går til bunnen av skjærmen taper man
 
     //pipes legges inn
     for (let i = 0; i < pipeArray.length; i++) {
         let pipe = pipeArray[i];
-        pipe.x += veloxityX //skifter x posisjonen til pipe-en 2px til høyre hver gang
+        pipe.x += velocityX //skifter x posisjonen til pipe-en 2px til høyre hver gang
         context.drawImage(pipe.img, pipe.x, pipe.y, pipe.width, pipe.height);
+
+        if (!pipe.passed && bird.x > pipe.x + pipe.width) {
+            score += 0.5; //0.5 fordi det er 2 pipes. 0.5*2 = 1, så 1 for hver sett av pipes 
+            pipe.passed = true; 
+        } //! = not
+
+        if (detectCollision(bird, pipe)) {
+            gameOver = true;
+        }
+    }
+
+    //clear pipes
+    while (pipeArray.length > 0 && pipeArray[0].x < -pipeWidth) {
+        pipeArray.shift(); //fjerner første elementene fra array, fjerner pipes etter de er utenfor
+    }
+
+    //stillingen
+    context.fillStyle = "white"; //fargen av teksten
+    context.font = "45px sans-serif"; //fonten og størrelse
+    context.fillText(score, 5, 45); //hvor den er på skjærmen
+
+    if (gameOver) {
+        context.fillText("GAME OVER", 5, 90) //legger inn at spillet er over med tekst
     }
 }
 
 function placePipes() {
-
+    if (gameOver) { 
+        return;
+    }
     //slik at pipes kommer på forskjellige høyder
     //0-1 * pipeHeight/2
     //hvis random returnerer 0 -> blir y posisjonen -128 (pipeheight/4)
@@ -116,8 +153,24 @@ function placePipes() {
 }
 
 function moveBird(e) {
-    if (e.code == "space" || e.code == "ArrowUp" || e.code == "KeyX") {
+    if (e.code == "Space" || e.code == "ArrowUp" || e.code == "KeyX") {
         //hopp
         velocityY = -6;
+
+        //reset game
+        //når det er game over, reseter man properties til default value
+        if (gameOver) {
+            bird.y = birdY;
+            pipeArray = [];
+            score = 0
+            gameOver = false; 
+        }
     }
+}
+
+function detectCollision(a, b) {
+    return a.x < b.x + b.width &&
+        a.x + a.width > b.x &&
+        a.y < b.y + b.height &&
+        a.y + a.height > b.y;
 }
