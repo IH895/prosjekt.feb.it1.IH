@@ -1,7 +1,7 @@
 //board - canvasen
 let board;
 let boardWidth = 1200; //Hvor bred den skal være
-let boardHeight = 780; //hvor høy
+let boardHeight = 700; //hvor høy
 let context ; //brukes til å tegne på canvasen
 
 //fuglen
@@ -62,10 +62,22 @@ window.onload = function() {
     bottomPipeImg = new Image();
     bottomPipeImg.src = "bilder/bottompipe.png"
 
+    // Venter på at spilleren trykker på en knapp
+    document.addEventListener("keydown", startGame);
+}
+
+    function startGame() {
+    // Skjuler startmeldingen
+    document.getElementById("startMessage").style.display = "none";
+
+
     requestAnimationFrame(update);
     //skape en function som legger inn pipes
     setInterval(placePipes, 1500); //hver 1.5s
     document.addEventListener("keydown", moveBird); //hver gang du trykker på en key, kaller den movebird functionen
+
+    // Fjerner event listeneren slik at denne funksjonen ikke kjører flere ganger
+    document.removeEventListener("keydown", startGame);
 }
 
 //oppdaterer canvasen (tegner den på nytt og på nytt)
