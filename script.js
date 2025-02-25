@@ -1,7 +1,7 @@
 //board - canvasen
 let board;
 let boardWidth = 1200; //Hvor bred den skal være
-let boardHeight = 700; //hvor høy
+let boardHeight = 780; //hvor høy
 let context ; //brukes til å tegne på canvasen
 
 //fuglen
@@ -10,9 +10,9 @@ let birdHeight = 24; //hvor høy fuglen er
 //legge x og y kordinat for hvor fuglen skal være på canvasen
 let birdX = boardWidth/3; //setter den i den første 8 delen av skjermen
 let birdY = boardHeight/2 //setter den i midten av høyden
-let birdImg;
+let birdImg;//brukes til å lagre bilde av fuglen som skal tegnes på canvasen
 
-//koder fuglen (fugl objektet)
+//koder fuglen (fugl objektet)objekt som lagrer posisjonen og størrelsen til fuglen
 let bird = {
     x : birdX,
     y : birdY,
@@ -23,16 +23,17 @@ let bird = {
 //pipes
 //bruker en array til å lagre disse, fordi det er flere
 let pipeArray = [];
-let pipeWidth = 64;
-let pipeHeight = 512;
-let pipeX = boardWidth;
-let pipeY = 0;
+let pipeWidth = 64; //bredden på hver pipe
+let pipeHeight = 512; //høyden av hver pipe
+let pipeX = boardWidth; //pipe starter utenfor skjermen til høyre
+let pipeY = 0; //y-posisjonen starter på toppen
 
+//lagrer bildene av de øverste og nederste pipesene
 let topPipeImg;
 let bottomPipeImg;
 
 //physics
-let velocityX = -2; //pipes flytter seg til høyre
+let velocityX = -2; //pipes flytter seg mot venstre
 let velocityY = 0; //fuglen hoppe hastighet (legger til at når du trykker på space blir velocityY til et negativt tall)
 let gravity = 0.4; //drar fuglen nedover
 
@@ -44,7 +45,7 @@ window.onload = function() {
     board = document.getElementById("board")
     board.height = boardHeight;
     board.width = boardWidth;
-    context = board.getContext("2d") //brukes til å tegne på board
+    context = board.getContext("2d") //brukes til å tegne på board, henter inn tegnekonteksten
 
     //tegner fuglen
    
@@ -71,7 +72,7 @@ window.onload = function() {
     document.getElementById("startMessage").style.display = "none";
 
 
-    requestAnimationFrame(update);
+    requestAnimationFrame(update); //setter i gang oppdateringsløkken
     //skape en function som legger inn pipes
     setInterval(placePipes, 1500); //hver 1.5s
     document.addEventListener("keydown", moveBird); //hver gang du trykker på en key, kaller den movebird functionen
@@ -81,6 +82,7 @@ window.onload = function() {
 }
 
 //oppdaterer canvasen (tegner den på nytt og på nytt)
+//kjører update() igjen for neste bilde
 function update () {
     requestAnimationFrame(update);
     if (gameOver) {
@@ -126,7 +128,7 @@ function update () {
 
     if (gameOver) {
         context.fillText("GAME OVER", 440, 300) //legger inn at spillet er over med tekst
-        context.fillText("Trykk på en knapp for å starte på nytt", 220, 360)
+        context.fillText("Trykk på en space eller pil opp for å starte på nytt", 120, 360)
     }
 }
 
@@ -181,9 +183,13 @@ function moveBird(e) {
     }
 }
 
+//om fuglen treffer
+//skjekker om fuglen (a) treffer en pipe (b)
 function detectCollision(a, b) {
-    return a.x < b.x + b.width &&
-        a.x + a.width > b.x &&
-        a.y < b.y + b.height &&
-        a.y + a.height > b.y;
+    return a.x < b.x + b.width && //Sjekker om venstre side av a er til venstre for høyre side av b.
+        a.x + a.width > b.x && //Sjekker om høyre side av a er til høyre for venstre side av b.
+        a.y < b.y + b.height && //Sjekker om toppen av a er over bunnen av b.
+        a.y + a.height > b.y; //Sjekker om bunnen av a er under toppen av b.
 }
+
+//betingelsene må være true for at de to rektanglene skal overlappe. Hvis én av dem er false, betyr det at det er minst én kant som ikke berører den andre, og dermed ingen kollisjon. Hvis funksjon returnerer true, blir spillet game over
