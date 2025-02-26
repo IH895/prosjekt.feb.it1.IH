@@ -127,8 +127,8 @@ function update () {
     context.fillText(score, 5, 45); //hvor den er på skjærmen
 
     if (gameOver) {
-        context.fillText("GAME OVER", 440, 300) //legger inn at spillet er over med tekst
-        context.fillText("Trykk på en space eller pil opp for å starte på nytt", 120, 360)
+        context.fillText("GAME OVER - Du fikk " + score + " poeng", 300, 300) //legger inn at spillet er over med tekst
+        context.fillText("Trykk på space eller pil opp for å starte på nytt", 140, 360)
     }
 }
 
